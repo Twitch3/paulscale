@@ -26,6 +26,9 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 
     private TextView lastSelectedScale;
 
+    private int prevClick = 0;
+    private String prevText;
+
     @Override
     public void onResume() {
         super.onResume();
@@ -150,9 +153,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         }
         return super.onOptionsItemSelected(item);
     }
-
-    private int prevClick = 0;
-    private String prevText;
 
     @Override
     public void onClick(View scale) {
