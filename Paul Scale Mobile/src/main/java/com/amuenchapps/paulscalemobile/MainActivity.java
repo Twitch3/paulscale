@@ -26,14 +26,19 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 
     private TextView lastSelectedScale;
 
-    private int prevClick = 0;
-    private String prevText;
+    private int prevClick = 0; //The ID of the previously selected scale
+    private String prevText; //The text of the previously selected scale
 
     @Override
     public void onResume() {
         super.onResume();
     }
 
+    /**
+     * Function executed when the app is set into a paused state. If a new scale selection
+     * has taken place, we will store the ID, text, and color of that scale to use upon
+     * re-initialization of the app.
+     **/
     @Override
     protected void onPause() {
         super.onPause();
@@ -41,7 +46,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         // Store values between instances here
         SharedPreferences saveState = getPreferences(MODE_PRIVATE);
         SharedPreferences.Editor editor = saveState.edit();  // Put the values from the UI
-//        System.out.println("Pausing, prevClick val = " + prevClick);
+
         if (prevClick != 0) {
             View colorView = findViewById(prevClick);
             int savedColor = ((ColorDrawable)colorView.getBackground()).getColor();
@@ -53,13 +58,21 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         }
     }
 
+    /**
+     * Function executed when the app is started. Depending on if the device is in portrait mode or
+     * landscape mode, we will grab all applicable scale TextViews and set up the appropriate
+     * OnClick and OnLongClick listeners. We will also attempt to read a save state and set the
+     * appropriate ID, text, and color of our ContentView for any previously selected scale.
+     **/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //portrait mode initialization code
+        //Portrait mode initialization code
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
         {
             setContentView(R.layout.activity_main);
+
+            //Initialize basic TextView components
             scale0 = (TextView) findViewById(R.id.scale0);
             scale1 = (TextView) findViewById(R.id.scale1);
             scale2 = (TextView) findViewById(R.id.scale2);
@@ -70,6 +83,8 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             scale7 = (TextView) findViewById(R.id.scale7);
             scale8 = (TextView) findViewById(R.id.scale8);
             scale9 = (TextView) findViewById(R.id.scale9);
+
+            //Set on click listeners
             scale0.setOnClickListener(this);
             scale1.setOnClickListener(this);
             scale2.setOnClickListener(this);
@@ -80,6 +95,8 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             scale7.setOnClickListener(this);
             scale8.setOnClickListener(this);
             scale9.setOnClickListener(this);
+
+            //Set on long click listeners
             scale0.setOnLongClickListener(this);
             scale1.setOnLongClickListener(this);
             scale2.setOnLongClickListener(this);
@@ -91,6 +108,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             scale8.setOnLongClickListener(this);
             scale9.setOnLongClickListener(this);
 
+            //Attempt to get a save state with a selected scale
             SharedPreferences saveState = getPreferences(MODE_PRIVATE);
             int sample = saveState.getInt("scaleID", 0);
             View scale = (View)findViewById(sample);
@@ -100,6 +118,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
                 lastSelectedScale = (TextView)findViewById(scale.getId());
                 prevClick = sample;
             }
+
             if(lastSelectedScale != null)
             {
                 TextView clickedTV = (TextView)findViewById(scale.getId());
@@ -113,8 +132,10 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             {
                 Log.d("ON_RESUME", "NoView");
             }
-        //landscape initialization code
-        } else {
+
+        }
+        //Landscape mode initialization code
+        else {
             setContentView(R.layout.layout_landscape);
             SharedPreferences saveState = getPreferences(MODE_PRIVATE);
             TextView l_fullText = (TextView) findViewById(R.id.fs_textView);
@@ -134,6 +155,9 @@ public class MainActivity extends Activity implements View.OnClickListener, View
     }
 
 
+    /**
+     * Simple onCreateOptionsMenu without any special functionality added.
+     **/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         
@@ -141,7 +165,9 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
-
+    /**
+     * Simple onOptionsItemSelected without any special functionality added.
+     **/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -154,14 +180,21 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Function executed whenever one of our scales is selected. We need to set up the scale to be
+     * highlighted and change the border of the app to match the corresponding color of the scale
+     * that was now selected.
+     **/
     @Override
     public void onClick(View scale) {
-        if(scale.getId() == prevClick)
+        if(scale.getId() == prevClick) //If the scale selected is already set as active
         {
-            //do nothing
+            //Do nothing
             System.out.println("Same button!");
-        }else if (0 == prevClick){
-            //set new button
+
+        }else if (prevClick == 0){ //If no scale has been selected yet
+
+            //Set new button
             prevClick = scale.getId();
             Drawable clickedColor = scale.getBackground();
             TextView clickedTV = (TextView)findViewById(scale.getId());
@@ -170,13 +203,16 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             clickedTV.setTypeface(null, Typeface.BOLD);
             mainLayout = (RelativeLayout) findViewById(R.id.layout);
             mainLayout.setBackground(clickedColor);
-        }else{
-            //reset previous button
+
+        }else{ //If a scale has been previously selected
+
+            //Reset previous button
             TextView oldTV = (TextView)findViewById(prevClick);
             oldTV.setText(prevText);
             oldTV.setTextSize(14);
             oldTV.setTypeface(Typeface.SANS_SERIF);
-            //set new button
+
+            //Set new button
             prevClick = scale.getId();
             Drawable clickedColor = scale.getBackground();
             TextView clickedTV = (TextView)findViewById(scale.getId());
@@ -185,9 +221,15 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             clickedTV.setTypeface(null, Typeface.BOLD);
             mainLayout = (RelativeLayout) findViewById(R.id.layout);
             mainLayout.setBackground(clickedColor);
+
         }
     }
 
+    /**
+     * Function executed whenever one of our scales is pressed down for a long click. Apart from
+     * activating a normal click even on the selected scale, we also trigger our share functionality
+     * here to share the status out via various sending methods.
+     **/
     @Override
     public boolean onLongClick(View scale) {
         onClick(scale);
