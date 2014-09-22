@@ -9,7 +9,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -111,7 +110,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             //Attempt to get a save state with a selected scale
             SharedPreferences saveState = getPreferences(MODE_PRIVATE);
             int sample = saveState.getInt("scaleID", 0);
-            View scale = (View)findViewById(sample);
+            View scale = findViewById(sample);
             View mainView = findViewById(R.id.layout);
             if(scale != null)
             {
@@ -122,11 +121,13 @@ public class MainActivity extends Activity implements View.OnClickListener, View
             if(lastSelectedScale != null)
             {
                 TextView clickedTV = (TextView)findViewById(scale.getId());
-                prevText = clickedTV.getText().toString();
-                clickedTV.setTextSize(20);
-                clickedTV.setTypeface(null, Typeface.BOLD);
-                ColorDrawable lastBackground = (ColorDrawable)lastSelectedScale.getBackground();
-                mainView.setBackgroundColor(lastBackground.getColor());
+                if(clickedTV != null) {
+                    prevText = clickedTV.getText().toString();
+                    clickedTV.setTextSize(20);
+                    clickedTV.setTypeface(null, Typeface.BOLD);
+                    ColorDrawable lastBackground = (ColorDrawable)lastSelectedScale.getBackground();
+                    mainView.setBackgroundColor(lastBackground.getColor());
+                }
             }
             else
             {
@@ -174,10 +175,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
     /**
